@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Awesome editor</title>
+	<style type="text/css">
+		
+		.heading {
+			color: goldenrod
+		}
+
+		.heading.l-1 {
+			font-size: 24px
+		}
+
+		.heading.l-2 {
+			font-size: 22px
+		}
+
+		.heading.l-3 {
+			font-size: 20px
+		}
+
+		#editor {
+			border: 1px solid blue;
+			max-width: 600px;
+			min-height: 200px;
+		}
+		#editor > div {
+			border: 1px solid red;
+			line-height: 1.5;
+		}
+
+		#editor div:active,
+		#editor div:focus {
+			background: red;
+		}
+
+		.hashtag {
+			color: blue
+		}
+
+		.mention {
+			color: green
+		}
+	</style>
+</head>
+<body>
+	<script type="text/javascript">
+		var getText = function() {
+			var editor = document.getElementById('editor')
+			console.log(editor.innerText)
+		}
+
+		var putText = function() {
+			var editor = document.getElementById('editor')
+			editor.childNodes[0].innerHTML = `ja hier gaan we dan #maarten
+			ik kan dit nu wel gaan opslaan maar wat krijg je dan eigenlijk???`
+		}
+	</script>
+	<div id="editor"><div></div></div>
+	<button onclick="getText()">Get text from input</button>
+	<button onclick="putText()">Put some text</button>
+	<script src="bundle.js"></script>
+</body>
+</html>
