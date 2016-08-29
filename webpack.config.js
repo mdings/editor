@@ -1,5 +1,3 @@
-// @TODO: include a dev server
-
 module.exports = {
     entry: './main.js',
 
