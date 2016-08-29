@@ -87,7 +87,9 @@ class Editor {
             }
 
             if (mutation.type == 'childList') {
-
+                
+                // @TODO: check mutation target to rewrite things below.
+                // if the target is #editor, it's probably a child we want to listen for
                 const nodes = []
 
                 // keep track of the added nodes
