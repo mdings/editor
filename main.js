@@ -1,3 +1,6 @@
+
+// @TODO: find the proper way to block the mutation observer while highlighting
+
 import {extend, escapeHTML} from './utils'
 import caret from './caret'
 import templates from './templates'
@@ -6,7 +9,7 @@ const observer = {
 
     subtree: true,                  // watch mutations from children
     attributes: false,
-    childList: false,               // watch when children added
+    childList: true,               // watch when children added
     characterData: true,
     characterDataOldValue: true
 }
@@ -14,9 +17,7 @@ const observer = {
 const settings = {
 
     regexs: [
-        { pattern: /(#+)(.*)/g, template: templates.heading },
-        { pattern: /((https?):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?)/gi, template: '<span class="url">$1</span>' },
-        { pattern: /(@([a-z\d_]+))/gi, template: '<span class="mention">$1</span>' }
+        { pattern: /(#+)(.*)/g, template: templates.heading }
     ]
 }
 
@@ -45,7 +46,10 @@ class Editor {
         this.settings = extend(settings, opts)
 
         this.elm.setAttribute('contenteditable', true)
+        this.elm.style.whiteSpace = 'pre-wrap'
         this.elm.focus()
+
+        this.blocked = false
 
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
@@ -61,26 +65,42 @@ class Editor {
 
         mutations.forEach((mutation) => {
 
-            if (!this.blocked) {
+            if (mutation.type == 'characterData') {
 
-                if (mutation.type == 'characterData') {
+                console.log('triggering character data')
+                const target = mutation.target.parentNode
+                this.target = target
 
-                    const target = mutation.target.parentNode
-                    this.target = target
+                if (target) {
 
-                    if (target) {
+                    // look for the closest wrapping div ('#editor > div')
+                    const closest = target.closest('div')
 
-                        // look for the closest wrapping div ('#editor > div')
-                        const closest = target.closest('div')
+                    if (closest) {
 
-                        this.highlight(closest)
+                        const pos = caret.get(closest)
                         
+                        this.highlight(closest)
+                        caret.set(closest, pos)
                     }
                 }
+            }
 
-                if (mutation.type == 'childList') {
+            if (mutation.type == 'childList') {
 
-                    console.log('do something with childlist')
+                const nodes = []
+
+                // keep track of the added nodes
+                mutation.addedNodes.forEach((node) => {
+
+                    nodes.push(node.nodeName.toLowerCase())
+                })
+
+                // the added node is a div
+                const index = nodes.indexOf('div')
+                if (index > -1) {
+
+                    mutation.addedNodes[index].innerHTML = ''
                 }
             }
         })
@@ -88,33 +108,68 @@ class Editor {
 
     onPaste(e) {
 
-        this.blocked = true
-        const paste = e.clipboardData.getData('text/plain');
+        const paste = e.clipboardData.getData('text/plain')
+        let node = e.path[0]
 
         if (paste) {
 
             // create an empty element to paste the text in
             // so it can be sanitized and escaped
-            const sanitizer = document.createElement('input')
+            const sanitizer = document.createElement('textarea')
             sanitizer.value = paste
 
-            const pos = caret.get(this.target) 
-            const html = this.target.innerText
-            const pastedText = escapeHTML(sanitizer.value)
+            let blocks = sanitizer.value.toString().split('\n')
+            
+            // remove empty blocks
+            blocks = blocks.filter((block) => {
 
-        	this.target.innerHTML = html.substring(0, pos.start) + pastedText + html.substr(pos.end);
-            this.highlight()
+                return block.length > 0
+            })
+
+            blocks.forEach((block, index) => {
+
+                // the first blocks should be appended to the current node
+                if (index == 0) {
+                    
+                    const pos = caret.get(node)
+                    const pre = node.innerText.substring(0, pos)
+                    const trail = node.innerText.substring(pos, node.innerText.length)
+                    
+                    node.innerHTML = pre + block + trail
+                    this.highlight(node)
+                    caret.set(node, pos + block.length)
+                    this.blocked = false
+
+                } else {
+
+                    // all the rest should be created inside a new div, which will probably
+                    // trigger a childList mutation
+                    const div = document.createElement('div')
+                    div.innerHTML = block
+                    node.parentNode.insertBefore(div, node.nextSibling);
+                    node = div
+
+                    if (index == (blocks.length-1)) {
+
+                        // set the caret to the last position in the last node
+                        caret.set(node, node.innerText.length)
+                    }
+
+                }
+                
+
+                
+            })
+
+            e.preventDefault()
         }
 
-        e.preventDefault()
     }
 
     highlight(node) {
 
         if (node) {
 
-            this.blocked = true
-            const pos = caret.get(node)
             let text = escapeHTML(node.innerText)
 
             this.settings.regexs.forEach((regex) => {
@@ -123,10 +178,8 @@ class Editor {
             })
 
             node.innerHTML = text;
-            caret.set(node, pos)
 
             this.trigger('change', this)
-            this.blocked = false
         }
     }
 
@@ -175,5 +228,5 @@ class Editor {
 
 const editor = new Editor('#editor')
 editor.on('change', () => {
-    console.log(editor.getHTML())
+    // console.log(editor.getHTML())
 })
