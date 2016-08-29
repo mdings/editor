@@ -117,6 +117,7 @@ class Editor {
 
             // create an empty element to paste the text in
             // so it can be sanitized and escaped
+            // @TODO: remove the sanitizer element after sanitizing
             const sanitizer = document.createElement('textarea')
             sanitizer.value = paste
 
