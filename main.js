@@ -115,55 +115,7 @@ class Editor {
 
         if (paste) {
 
-            // create an empty element to paste the text in
-            // so it can be sanitized and escaped
-            // @TODO: remove the sanitizer element after sanitizing
-            const sanitizer = document.createElement('textarea')
-            sanitizer.value = paste
-
-            let blocks = sanitizer.value.toString().split('\n')
-            
-            // remove empty blocks
-            blocks = blocks.filter((block) => {
-
-                return block.length > 0
-            })
-
-            blocks.forEach((block, index) => {
-
-                // the first blocks should be appended to the current node
-                if (index == 0) {
-                    
-                    const pos = caret.get(node)
-                    const pre = node.innerText.substring(0, pos)
-                    const trail = node.innerText.substring(pos, node.innerText.length)
-                    
-                    node.innerHTML = pre + block + trail
-                    this.highlight(node)
-                    caret.set(node, pos + block.length)
-                    this.blocked = false
-
-                } else {
-
-                    // all the rest should be created inside a new div, which will probably
-                    // trigger a childList mutation
-                    const div = document.createElement('div')
-                    div.innerHTML = block
-                    node.parentNode.insertBefore(div, node.nextSibling);
-                    node = div
-
-                    if (index == (blocks.length-1)) {
-
-                        // set the caret to the last position in the last node
-                        caret.set(node, node.innerText.length)
-                    }
-
-                }
-                
-
-                
-            })
-
+            this.insertText(paste, node)
             e.preventDefault()
         }
 
@@ -186,11 +138,77 @@ class Editor {
         }
     }
 
+    insertText(text, node = null) {
+
+        text = JSON.parse(localStorage.getItem('text'))
+
+        if (!node) {
+
+            // stop observing while re-entering the div
+            this.observer.disconnect()
+            this.elm.innerHTML  = "<div></div>"
+            node = this.elm.firstChild
+
+            // reconnect the observer
+            setTimeout(() => {
+
+                this.observer.observe(this.elm, observer)
+            })
+            
+        }
+
+        // create an empty element to paste the text in
+        // so it can be sanitized and escaped
+        const sanitizer = document.createElement('textarea')
+        sanitizer.value = text
+
+        let blocks = sanitizer.value.toString().split('\n')
+        
+        // remove empty blocks
+        blocks = blocks.filter((block) => {
+
+            return block.length > 0
+        })
+
+        blocks.forEach((block, index) => {
+
+            // the first blocks should be appended to the current node
+            if (index == 0) {
+                
+                const pos = caret.get(node)
+                const pre = node.innerText.substring(0, pos)
+                const trail = node.innerText.substring(pos, node.innerText.length)
+
+                node.innerHTML = pre + block + trail
+                this.highlight(node)
+                caret.set(node, pos + block.length)
+
+            } else {
+
+                // all the rest should be created inside a new div, which will probably
+                // trigger a childList mutation
+                const div = document.createElement('div')
+                div.innerHTML = block
+                node.parentNode.insertBefore(div, node.nextSibling);
+                node = div
+
+                if (index == (blocks.length-1)) {
+
+                    // set the caret to the last position in the last node
+                    caret.set(node, node.innerText.length)
+                }
+
+            }
+        })
+    }
+
     getHTML() {
         return this.elm.innerHTML
     }
 
     getText() {
+
+        localStorage.setItem('text', JSON.stringify(this.elm.innerText))
         return this.elm.innerText
     }
 
@@ -229,7 +247,4 @@ class Editor {
     }
 }
 
-const editor = new Editor('#editor')
-editor.on('change', () => {
-    // console.log(editor.getHTML())
-})
+global.Editor = Editor

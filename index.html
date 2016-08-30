@@ -73,8 +73,15 @@
 	</script>
 	<div id="editor"><div></div></div>
 	<div id="test" contenteditable="true"><div></div></div>
-	<button onclick="getText()">Get text from input</button>
-	<button onclick="putText()">Put some text</button>
+	<button onclick="editor.getText()">Get text from input</button>
+	<button onclick="editor.insertText('Maarten')">Put some text</button>
 	<script src="build/bundle.js"></script>
+	<script>
+		const editor = new Editor('#editor')
+		editor.on('change', () => {
+    		// console.log(editor.getHTML())
+		})
+
+</script>
 </body>
 </html>
