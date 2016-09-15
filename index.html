@@ -4,20 +4,43 @@
 	<title>Awesome editor</title>
 	<style type="text/css">
 		
+		* {
+
+			margin: 0;
+			padding: 0;
+		}
+
+		#editor {
+			margin-left: 20px;
+		}
+
+		.hljs-bullet {
+			color: #ccc;
+		}
+
+		.hljs-section {
+			font-weight: bold;
+		}
+
 		.heading {
 			color: goldenrod
 		}
 
-		.heading.l-1 {
-			font-size: 24px
+		.bold {
+			font-weight: bold;
 		}
 
-		.heading.l-2 {
-			font-size: 22px
+		.image {
+			border: 1px solid green;
 		}
 
-		.heading.l-3 {
-			font-size: 20px
+		.link {
+			text-decoration: underline
+		}
+
+		.list-item {
+			display: inline-block;
+			margin-left: 10px;
 		}
 
 		#editor {
@@ -44,11 +67,6 @@
 			content: counter(paragraph);
 		}
 
-		#editor div:active,
-		#editor div:focus {
-			background: red;
-		}
-
 		.hashtag {
 			color: blue
 		}
@@ -59,6 +77,7 @@
 	</style>
 </head>
 <body>
+	<script type="text/javascript" src="slimdown.js"></script>
 	<script type="text/javascript">
 		var getText = function() {
 			var editor = document.getElementById('editor')
@@ -71,15 +90,14 @@
 			ik kan dit nu wel gaan opslaan maar wat krijg je dan eigenlijk???`
 		}
 	</script>
-	<div id="editor"><div></div></div>
-	<div id="test" contenteditable="true"><div></div></div>
+	<pre id="editor"><div></div></pre>
 	<button onclick="editor.getText()">Get text from input</button>
 	<button onclick="editor.insertText('Maarten')">Put some text</button>
 	<script src="build/bundle.js"></script>
 	<script>
 		const editor = new Editor('#editor')
 		editor.on('change', () => {
-    		// console.log(editor.getHTML())
+    		// console.log(editor.getText())
 		})
 
 </script>

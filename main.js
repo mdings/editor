@@ -1,9 +1,9 @@
 
 // @TODO: find the proper way to block the mutation observer while highlighting
 
-import {extend, escapeHTML} from './utils'
+import {extend} from './utils'
 import caret from './caret'
-import templates from './templates'
+import hljs from 'highlight.js'
 
 const observer = {
 
@@ -16,9 +16,6 @@ const observer = {
 
 const settings = {
 
-    regexs: [
-        { pattern: /(#+)(.*)/g, template: templates.heading }
-    ]
 }
 
 const events = {
@@ -34,10 +31,12 @@ class Editor {
         const elm = document.querySelector(el)
         
         if (!(elm instanceof HTMLElement)) {
+
             throw new Error('Invalid `el` argument, HTMLElement required');
         }
 
         if (!(opts instanceof Object)) {
+            
             throw new Error('Invalid `options` argument, object required');
         }
 
@@ -49,12 +48,12 @@ class Editor {
         this.elm.style.whiteSpace = 'pre-wrap'
         this.elm.focus()
 
-        this.blocked = false
-
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
+
         // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
+
         // watch for paste event
         this.elm.addEventListener('paste', this.onPaste.bind(this))
 
@@ -66,11 +65,11 @@ class Editor {
         mutations.forEach((mutation) => {
 
             if (mutation.type == 'characterData') {
-
-                console.log('triggering character data')
+                
                 const target = mutation.target.parentNode
                 this.target = target
 
+                console.log(mutation)
                 if (target) {
 
                     // look for the closest wrapping div ('#editor > div')
@@ -87,23 +86,8 @@ class Editor {
             }
 
             if (mutation.type == 'childList') {
-                
-                // @TODO: check mutation target to rewrite things below.
-                // if the target is #editor, it's probably a child we want to listen for
-                const nodes = []
-
-                // keep track of the added nodes
-                mutation.addedNodes.forEach((node) => {
-
-                    nodes.push(node.nodeName.toLowerCase())
-                })
-
-                // the added node is a div
-                const index = nodes.indexOf('div')
-                if (index > -1) {
-
-                    mutation.addedNodes[index].innerHTML = ''
-                }
+                return
+                console.log(mutation)
             }
         })
     }
@@ -125,14 +109,10 @@ class Editor {
 
         if (node) {
 
-            let text = escapeHTML(node.innerText)
+            let text = node.innerText
+            const highlight = hljs.highlight('markdown', text, true)
 
-            this.settings.regexs.forEach((regex) => {
-
-                text = text.replace(regex.pattern, regex.template)
-            })
-
-            node.innerHTML = text;
+            node.innerHTML = highlight.value
 
             this.trigger('change', this)
         }
@@ -162,13 +142,9 @@ class Editor {
         const sanitizer = document.createElement('textarea')
         sanitizer.value = text
 
-        let blocks = sanitizer.value.toString().split('\n')
-        
-        // remove empty blocks
-        blocks = blocks.filter((block) => {
-
-            return block.length > 0
-        })
+        let blocks = sanitizer.value
+            .toString()
+            .split(/\f/)
 
         blocks.forEach((block, index) => {
 
@@ -203,12 +179,24 @@ class Editor {
     }
 
     getHTML() {
+
         return this.elm.innerHTML
+    }
+
+    getTextForStorage() {
+
+        let textBlocks = []
+
+        this.elm.childNodes.forEach((e) => {
+
+            textBlocks.push(e.innerText)
+        })
+        
+        return textBlocks.join('\f')
     }
 
     getText() {
 
-        localStorage.setItem('text', JSON.stringify(this.elm.innerText))
         return this.elm.innerText
     }
 
