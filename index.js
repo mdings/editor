@@ -235,4 +235,4 @@ class Editor {
     }
 }
 
-global.Editor = Editor
+module.exports = Editor
