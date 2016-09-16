@@ -77,7 +77,6 @@
 	</style>
 </head>
 <body>
-	<script type="text/javascript" src="slimdown.js"></script>
 	<script type="text/javascript">
 		var getText = function() {
 			var editor = document.getElementById('editor')
@@ -93,7 +92,7 @@
 	<pre id="editor"><div></div></pre>
 	<button onclick="editor.getText()">Get text from input</button>
 	<button onclick="editor.insertText('Maarten')">Put some text</button>
-	<script src="build/index.js"></script>
+	<script src="/lib/editor.dev.js"></script>
 	<script>
 		const editor = new Editor('#editor')
 		editor.on('change', () => {

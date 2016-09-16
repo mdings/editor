@@ -26,7 +26,7 @@ const events = {
 class Editor {
 
     constructor(el, options) {
-
+        
         const opts = options || {}
         const elm = document.querySelector(el)
         
@@ -234,4 +234,4 @@ class Editor {
     }
 }
 
-window.Editor = module.exports = Editor
+export default Editor
