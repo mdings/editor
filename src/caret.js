@@ -23,7 +23,7 @@ const get = (node) => {
 const set = (node, pos) => {
 
     // loop through childnodes
-    for (let n of node.childNodes) {
+    node.childNodes.forEach((n) => {
         
         if (n.nodeType == 3) { // text node
 
@@ -46,13 +46,13 @@ const set = (node, pos) => {
         } else {
 
             pos = set(n, pos)
-            
+
             if(pos == -1) {
 
                 return -1 // no need to finish the for-loop
             }
         }
-    }
+    })
 
     return pos // needed because of recursion
 }
