@@ -7,10 +7,14 @@ var libName = 'Editor'
 var plugins = []
 var outputFile
 
-if (env === 'build') {
+if (env === 'build-min') {
 
     plugins.push(new UglifyJsPlugin({ minimize: true }))
     outputFile = 'lib/' + libName.toLowerCase() + '.min.js'
+
+} else if (env === 'build') {
+
+    outputFile = 'lib/' + libName.toLowerCase() + '.js'
 
 } else {
 

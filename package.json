@@ -2,11 +2,10 @@
   "name": "editor",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/editor.min.js",
+  "main": "lib/editor.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --port 8888",
     "dev": "WEBPACK_ENV=dev webpack-dev-server --hot --port 8888 --progress --colors",
-    "build": "WEBPACK_ENV=build webpack",
+    "build": "WEBPACK_ENV=build-min webpack --progress && WEBPACK_ENV=build webpack --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
