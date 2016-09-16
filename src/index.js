@@ -134,10 +134,6 @@ class Editor {
 
     insertText(text, node = null) {
 
-        debugger;
-        
-        text = JSON.parse(localStorage.getItem('text'))
-
         if (!node) {
 
             // stop observing while re-entering the div
