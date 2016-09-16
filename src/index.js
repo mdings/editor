@@ -203,7 +203,9 @@ class Editor {
 
         let textBlocks = []
 
-        this.elm.childNodes.forEach((e) => {
+        const nodes = Array.from(this.elm.childNodes)
+
+        nodes.forEach((e) => {
 
             textBlocks.push(e.innerText)
         })
