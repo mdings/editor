@@ -1,7 +1,7 @@
 
 // @TODO: find the proper way to block the mutation observer while highlighting
 
-import {extend} from './utils'
+import {extend, setStartingElement} from './utils'
 import caret from './caret'
 import hljs from 'highlight.js'
 
@@ -40,6 +40,11 @@ class Editor {
             throw new Error('Invalid `options` argument, object required');
         }
 
+        if (!elm.id) {
+
+            throw new Error('The element should have an id')
+        }
+
         this.elm = elm
         this.selector = el
         this.settings = extend(settings, opts)
@@ -47,6 +52,8 @@ class Editor {
         this.elm.setAttribute('contenteditable', true)
         this.elm.style.whiteSpace = 'pre-wrap'
         this.elm.focus()
+
+        setStartingElement(this.elm)
 
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
@@ -76,11 +83,8 @@ class Editor {
 
         mutations.forEach((mutation) => {
 
-            
-
             if (mutation.type == 'characterData') {
                 
-                    
                 const target = mutation.target.parentNode
                 this.target = target
 
@@ -100,8 +104,21 @@ class Editor {
             }
 
             if (mutation.type == 'childList') {
-                return
-                console.log(mutation)
+                
+                // only look for mutations on the parent #editor element
+                if (mutation.target.id == this.elm.id) {
+
+                    // make sure there is always a starting div
+                    setStartingElement(this.elm)
+
+                    // replace the <br> with an empty char for newly created sections
+                    const nodes = Array.from(mutation.addedNodes)
+                    nodes.forEach((node) => {
+
+                        node.innerHTML = node.innerHTML.replace('<br>', '')
+                    })
+
+                }
             }
         })
     }
@@ -138,7 +155,8 @@ class Editor {
 
             // stop observing while re-entering the div
             this.observer.disconnect()
-            this.elm.innerHTML  = "<div></div>"
+            this.elm.innerHTML = ''
+            setStartingElement()
             node = this.elm.firstChild
 
             // reconnect the observer

@@ -32,13 +32,13 @@ const set = (node, pos) => {
             if (n.length >= pos) {
 
                 // finally add our range
-                const range = document.createRange(),
-                sel = window.getSelection();
-                range.setStart(n, pos);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-                return -1; // we are done
+                const range = document.createRange()
+                const sel = window.getSelection()
+                range.setStart(n, pos)
+                range.collapse(true)
+                sel.removeAllRanges()
+                sel.addRange(range)
+                return -1 // we are done
 
             } else {
 

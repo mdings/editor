@@ -47,6 +47,16 @@
 			counter-reset: paragraph
 		}
 
+		#editor span {
+			display: inline-block;
+		}
+		
+		#editor > div {
+
+			min-height: 24px;
+			border: 1px solid green
+		}
+
 		#editor, #test {
 			border: 1px solid blue;
 			max-width: 600px;
@@ -54,9 +64,7 @@
 		}
 		#editor > div, #test > div {
 			position: relative;
-			border: 1px solid red;
 			line-height: 1.5;
-			min-height: 26px;
 		}
 
 		#editor > div:not(:empty)::before {
@@ -89,7 +97,7 @@
 			ik kan dit nu wel gaan opslaan maar wat krijg je dan eigenlijk???`
 		}
 	</script>
-	<div id="editor"><div></div></div>
+	<div id="editor"></div>
 	<button onclick="editor.getText()">Get text from input</button>
 	<button onclick="editor.insertText('Maarten')">Put some text</button>
 	<script src="/lib/editor.dev.js"></script>

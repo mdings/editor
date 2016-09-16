@@ -10,3 +10,15 @@ export function extend(defaults, options) {
 
     return defaults;
 }
+
+export function setStartingElement(node) {
+
+    if ((node.innerHTML.indexOf('div') < 0)) {
+        
+        const div = document.createElement('div')
+        div.innerHTML = '\n'
+        node.innerHTML = ''
+        node.appendChild(div)
+    }
+    
+}
