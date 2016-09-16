@@ -69,7 +69,6 @@ class Editor {
                 const target = mutation.target.parentNode
                 this.target = target
 
-                console.log(mutation)
                 if (target) {
 
                     // look for the closest wrapping div ('#editor > div')
@@ -235,4 +234,4 @@ class Editor {
     }
 }
 
-module.exports = Editor
+window.Editor = module.exports = Editor
