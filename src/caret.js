@@ -22,8 +22,10 @@ const get = (node) => {
 
 const set = (node, pos) => {
 
+    const children = Array.from(node.childNodes)
+
     // loop through childnodes
-    node.childNodes.forEach((n) => {
+    children.forEach((n) => {
         
         if (n.nodeType == 3) { // text node
 
