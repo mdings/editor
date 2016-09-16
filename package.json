@@ -2,7 +2,7 @@
   "name": "editor",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/editor.min.js",
   "scripts": {
     "start": "webpack-dev-server --hot --port 8888",
     "dev": "WEBPACK_ENV=dev webpack-dev-server --hot --port 8888 --progress --colors",
