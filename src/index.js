@@ -56,6 +56,18 @@ class Editor {
 
         // watch for paste event
         this.elm.addEventListener('paste', this.onPaste.bind(this))
+        
+        this.elm.addEventListener('keydown', (e) => {
+
+            if (e.which == 13) {
+
+                if (caret.parent().className == 'hljs-bullet') {
+
+                    // @TODO: make an automatic new list item
+                    // e.preventDefault()
+                }
+            }
+        })
 
         return this
     }
@@ -64,8 +76,11 @@ class Editor {
 
         mutations.forEach((mutation) => {
 
+            
+
             if (mutation.type == 'characterData') {
                 
+                    
                 const target = mutation.target.parentNode
                 this.target = target
 
@@ -119,6 +134,8 @@ class Editor {
 
     insertText(text, node = null) {
 
+        debugger;
+        
         text = JSON.parse(localStorage.getItem('text'))
 
         if (!node) {

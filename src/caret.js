@@ -1,5 +1,13 @@
 let caretOffset
 
+const parent = (node) => {
+
+    const range = window.getSelection().getRangeAt(0);
+
+    return range.startContainer.parentNode
+}
+
+
 const get = (node) => {
 
     const range = window.getSelection().getRangeAt(0);
@@ -15,16 +23,16 @@ const get = (node) => {
 const set = (node, pos) => {
 
     // loop through childnodes
-    for (let node of node.childNodes) {
+    for (let n of node.childNodes) {
         
-        if (node.nodeType == 3) { // text node
+        if (n.nodeType == 3) { // text node
 
-            if (node.length >= pos) {
+            if (n.length >= pos) {
 
                 // finally add our range
                 const range = document.createRange(),
                 sel = window.getSelection();
-                range.setStart(node,pos);
+                range.setStart(n, pos);
                 range.collapse(true);
                 sel.removeAllRanges();
                 sel.addRange(range);
@@ -32,12 +40,13 @@ const set = (node, pos) => {
 
             } else {
 
-                pos -= node.length
+                pos -= n.length
             }
 
         } else {
 
-            pos = set(node, pos)
+            pos = set(n, pos)
+            
             if(pos == -1) {
 
                 return -1 // no need to finish the for-loop
@@ -51,5 +60,6 @@ const set = (node, pos) => {
 export default {
     
     get,
-    set
+    set,
+    parent
 }
