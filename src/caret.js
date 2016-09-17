@@ -7,56 +7,96 @@ const parent = (node) => {
     return range.startContainer.parentNode
 }
 
+const createTreeWalker = (node) => {
+
+    return document.createTreeWalker(
+        node, // define the root
+        NodeFilter.SHOW_TEXT, // only textnodes
+        {
+            acceptNode: (node) => {
+
+                return NodeFilter.FILTER_ACCEPT
+            }
+        },
+        false
+    )
+}
 
 const get = (node) => {
 
-    const range = window.getSelection().getRangeAt(0);
-    const preCaretRange = range.cloneRange();
+    const treeWalker = createTreeWalker(node)
+    const sel = window.getSelection()
 
-    preCaretRange.selectNodeContents(node);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    caretOffset = preCaretRange.toString().length;
+    const pos = {
 
-    return caretOffset
+        start: 0,
+        end: 0
+    }
+
+    let isBeyondStart = false
+
+    while(treeWalker.nextNode()) {
+
+        console.log(treeWalker.currentNode)
+        
+        // anchorNode is where the selection starts
+        if(!isBeyondStart && treeWalker.currentNode === sel.anchorNode) {
+
+            isBeyondStart = true
+
+            pos.start += sel.anchorOffset
+
+            if(sel.isCollapsed) {
+
+                pos.end = pos.start
+                break
+            }
+
+        } else if(!isBeyondStart) {
+
+            pos.start += treeWalker.currentNode.length
+        }
+
+        if(!sel.isCollapsed && treeWalker.currentNode === sel.focusNode) {
+
+            pos.end += sel.focusOffset
+            break
+
+        } else if(!sel.isCollapsed) {
+
+            pos.end += treeWalker.currentNode.length
+        }
+    }
+
+    return pos
 }
 
-const set = (node, pos) => {
+const set = (node, index) => {
 
-    const children = Array.from(node.childNodes)
+    const treeWalker = createTreeWalker(node)
+    let currentPos = 0
 
-    // loop through childnodes
-    children.forEach((n) => {
-        
-        if (n.nodeType == 3) { // text node
+    while(treeWalker.nextNode()) {
 
-            if (n.length >= pos) {
+        currentPos += treeWalker.currentNode.length
 
-                // finally add our range
-                const range = document.createRange()
-                const sel = window.getSelection()
-                range.setStart(n, pos)
-                range.collapse(true)
-                sel.removeAllRanges()
-                sel.addRange(range)
-                return -1 // we are done
+        if (currentPos >= index) {
 
-            } else {
+            let prevValue = currentPos - treeWalker.currentNode.length
+            let offset = index - prevValue
 
-                pos -= n.length
-            }
+            const range = document.createRange()
 
-        } else {
+            range.setStart(treeWalker.currentNode, offset)
+            range.collapse(true)
 
-            pos = set(n, pos)
+            const sel = window.getSelection()
+            sel.removeAllRanges()
+            sel.addRange(range)
 
-            if(pos == -1) {
-
-                return -1 // no need to finish the for-loop
-            }
+            break
         }
-    })
-
-    return pos // needed because of recursion
+    }
 }
 
 export default {

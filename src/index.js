@@ -71,7 +71,7 @@ class Editor {
                 if (caret.parent().className == 'hljs-bullet') {
 
                     // @TODO: make an automatic new list item
-                    // e.preventDefault()
+                    e.preventDefault()
                 }
             }
         })
@@ -93,12 +93,12 @@ class Editor {
                     // look for the closest wrapping div ('#editor > div')
                     const closest = target.closest('div')
 
+
                     if (closest) {
 
                         const pos = caret.get(closest)
-                        
                         this.highlight(closest)
-                        caret.set(closest, pos)
+                        caret.set(closest, pos.start)
                     }
                 }
             }
