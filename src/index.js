@@ -55,7 +55,7 @@ class Editor {
         // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
 
-        this.setStartingElement()
+        // this.setStartingElement()
         this.elm.focus()
 
 
@@ -91,7 +91,7 @@ class Editor {
                 if (target) {
 
                     // look for the closest wrapping div ('#editor > div')
-                    const closest = target.closest('div')
+                    const closest = target.closest('.editor__section')
 
                     if (closest) {
 
@@ -106,19 +106,26 @@ class Editor {
                 
                 // only look for mutations on the parent #editor element
                 if (mutation.target.id == this.elm.id) {
-
-                    if(mutation.removedNodes.length) {
-
-                        // check for the rigth starting element when removing nodes
-                        this.setStartingElement()
-                    }
                     
-                    const nodes = mutation.addedNodes
+                    const nodes = Array.from(mutation.addedNodes)
                     nodes.forEach((node) => {
-                        
-                        // hightlight added nodes, dynamically inserted nodes via 
-                        // node.innerText = blabla are not detected via characterData 
-                        this.highlight(node)
+                    
+                        // if node is added check if it's actually a section
+                        if(node && node.className != 'editor__section') {
+
+                            const wrapper = document.createElement('div')
+                            wrapper.classList.add('editor__section')
+                            node.parentNode.insertBefore(wrapper, node);
+                            
+                            // trigger the childlist mutation again and then highlights the node
+                            wrapper.appendChild(node);
+
+                        } else {
+
+                            // hightlight added nodes, dynamically inserted nodes via 
+                            // node.innerText = blabla are not detected via characterData 
+                            this.highlight(node)
+                        }
                     })
                 }
             }
