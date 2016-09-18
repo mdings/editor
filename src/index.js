@@ -1,7 +1,4 @@
-
-// @TODO: find the proper way to block the mutation observer while highlighting
-
-import {extend, setStartingElement} from './utils'
+import {extend} from './utils'
 import caret from './caret'
 import hljs from 'highlight.js'
 
@@ -51,15 +48,16 @@ class Editor {
 
         this.elm.setAttribute('contenteditable', true)
         this.elm.style.whiteSpace = 'pre-wrap'
-        this.elm.focus()
-
-        setStartingElement(this.elm)
-
+        
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
 
         // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
+
+        this.setStartingElement()
+        this.elm.focus()
+
 
         // watch for paste event
         this.elm.addEventListener('paste', this.onPaste.bind(this))
@@ -75,6 +73,8 @@ class Editor {
                 }
             }
         })
+
+        
 
         return this
     }
@@ -93,7 +93,6 @@ class Editor {
                     // look for the closest wrapping div ('#editor > div')
                     const closest = target.closest('div')
 
-
                     if (closest) {
 
                         const pos = caret.get(closest)
@@ -108,16 +107,19 @@ class Editor {
                 // only look for mutations on the parent #editor element
                 if (mutation.target.id == this.elm.id) {
 
-                    // make sure there is always a starting div
-                    setStartingElement(this.elm)
+                    if(mutation.removedNodes.length) {
 
-                    // replace the <br> with an empty char for newly created sections
-                    const nodes = Array.from(mutation.addedNodes)
+                        // check for the rigth starting element when removing nodes
+                        this.setStartingElement()
+                    }
+                    
+                    const nodes = mutation.addedNodes
                     nodes.forEach((node) => {
-
-                        node.innerHTML = node.innerHTML.replace('<br>', '')
+                        
+                        // hightlight added nodes, dynamically inserted nodes via 
+                        // node.innerText = blabla are not detected via characterData 
+                        this.highlight(node)
                     })
-
                 }
             }
         })
@@ -130,7 +132,7 @@ class Editor {
 
         if (paste) {
 
-            this.insertText(paste, node)
+            this.setText(paste, node)
             e.preventDefault()
         }
 
@@ -140,31 +142,30 @@ class Editor {
 
         if (node) {
 
+            this.observer.disconnect()
+
             let text = node.innerText
             const highlight = hljs.highlight('markdown', text, true)
-
             node.innerHTML = highlight.value
+
+            this.observer.observe(this.elm, observer)
 
             this.trigger('change', this)
         }
     }
 
-    insertText(text, node = null) {
+    setText(text, node = null) {
 
         if (!node) {
 
-            // stop observing while re-entering the div
-            this.observer.disconnect()
-            this.elm.innerHTML = ''
-            setStartingElement()
-            node = this.elm.firstChild
+            // keep all content but the first element
+            while (this.elm.firstChild) {
 
-            // reconnect the observer
-            setTimeout(() => {
-
-                this.observer.observe(this.elm, observer)
-            })
+                this.elm.removeChild(this.elm.firstChild);
+            }
             
+            this.setStartingElement()
+            node = this.elm.firstChild
         }
 
         // create an empty element to paste the text in
@@ -185,16 +186,14 @@ class Editor {
                 const pre = node.innerText.substring(0, pos)
                 const trail = node.innerText.substring(pos, node.innerText.length)
 
-                node.innerHTML = pre + block + trail
-                this.highlight(node)
-                caret.set(node, pos + block.length)
+                node.textContent = pre + block + trail
+                caret.set(node, pos.start + block.length)
 
             } else {
 
-                // all the rest should be created inside a new div, which will probably
-                // trigger a childList mutation
+                // all the rest should be created inside a new div
                 const div = document.createElement('div')
-                div.innerHTML = block
+                div.textContent = block
                 node.parentNode.insertBefore(div, node.nextSibling);
                 node = div
 
@@ -230,6 +229,24 @@ class Editor {
     getText() {
 
         return this.elm.innerText
+    }
+
+    setStartingElement() {
+
+        // there are no children yet so create one
+        if(this.elm.firstChild == null) {
+
+            const div = document.createElement('div')
+            this.elm.appendChild(div)
+
+        // there is a first node but it's not a div
+        } else if (this.elm.firstChild.nodeName.toLowerCase() != 'div') {
+
+            const div = document.createElement('div')
+            this.elm.insertBefore(div, this.elm.firstChild)
+            this.elm.firstChild.nextSibling.remove()
+            caret.set(div, 0)
+        } 
     }
 
     attach(e, callback) {

@@ -54,7 +54,7 @@
 		#editor > div {
 
 			min-height: 24px;
-			border: 1px solid green
+			/*border: 1px solid green*/
 		}
 
 		#editor, #test {
@@ -75,31 +75,33 @@
 			content: counter(paragraph);
 		}
 
-		.hashtag {
-			color: blue
-		}
+		.hljs-emphasis {
 
-		.mention {
-			color: green
+			font-style: italic
 		}
 	</style>
 </head>
 <body>
-	<script type="text/javascript">
-		var getText = function() {
-			var editor = document.getElementById('editor')
-			console.log(editor.innerText)
+	<div id="editor"></div>
+	<script>
+		function saveText() {
+
+			var txt = editor.getTextForStorage()
+			localStorage.setItem('text', JSON.stringify(txt))
+			console.log(txt)
 		}
 
-		var putText = function() {
-			var editor = document.getElementById('editor')
-			editor.childNodes[0].innerHTML = `ja hier gaan we dan #maarten
-			ik kan dit nu wel gaan opslaan maar wat krijg je dan eigenlijk???`
+		function setText() {
+
+			var txt = JSON.parse(localStorage.getItem('text'))
+			console.log(txt)
+			editor.setText(txt)
+
 		}
+	
 	</script>
-	<div id="editor"></div>
-	<button onclick="editor.getText()">Get text from input</button>
-	<button onclick="editor.insertText('Maarten')">Put some text</button>
+	<button onclick="saveText()">Save content to memory</button>
+	<button onclick="setText()">Get content from memory</button>
 	<script src="/lib/editor.dev.js"></script>
 	<script>
 		const editor = new Editor('#editor')

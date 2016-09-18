@@ -15,6 +15,7 @@ const createTreeWalker = (node) => {
         {
             acceptNode: (node) => {
 
+                // by default accepts all nodes that are of type text
                 return NodeFilter.FILTER_ACCEPT
             }
         },
@@ -36,8 +37,6 @@ const get = (node) => {
     let isBeyondStart = false
 
     while(treeWalker.nextNode()) {
-
-        console.log(treeWalker.currentNode)
         
         // anchorNode is where the selection starts
         if(!isBeyondStart && treeWalker.currentNode === sel.anchorNode) {
