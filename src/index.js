@@ -1,4 +1,4 @@
-import {extend} from './utils'
+import {extend, isNode} from './utils'
 import caret from './caret'
 import hljs from 'highlight.js'
 
@@ -55,7 +55,7 @@ class Editor {
         // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
 
-        // this.setStartingElement()
+        this.setStartingElement()
         this.elm.focus()
 
 
@@ -123,8 +123,16 @@ class Editor {
                         } else {
 
                             // hightlight added nodes, dynamically inserted nodes via 
-                            // node.innerText = blabla are not detected via characterData 
-                            this.highlight(node)
+                            // node.innerText = blabla are not detected via characterData
+                            if (node.firstChild.nodeName.toLowerCase() == 'br') {
+
+                                node.firstChild.remove()
+                            }
+
+                            if (node.textContent.length) {
+                                
+                                this.highlight(node)
+                            }
                         }
                     })
                 }
@@ -134,14 +142,31 @@ class Editor {
 
     onPaste(e) {
 
+        // @TODO: paste logic should become as following:
+        // - get this.elm.innerText
+        // - sanitize the paste data (if the data is coming externally)
+        // - convert line breaks to sections (if the data is coming externally)
+        // - substite the selection (if any?, window.getSelection().toString()) from the innerText with the paste data
+        // - insert text in full editor
+        //  NOTE: to see if the paste data is coming externally we could create a copy event
+        //  inside the editor. When the copy data is the same as the paste, the data is internal
+
+        // this might not be the most efficient way to implement 
+        // pasting but for now the lesser evil
+
         const paste = e.clipboardData.getData('text/plain')
         let node = e.path[0]
+        
+        if(window.getSelection() == paste) {
 
-        if (paste) {
-
-            this.setText(paste, node)
-            e.preventDefault()
+            console.log('ok')
         }
+
+        // if (paste) {
+
+        //     e.preventDefault()
+        //     this.setText(paste, node)
+        // }
 
     }
 
@@ -161,9 +186,27 @@ class Editor {
         }
     }
 
+    //@TODO: create different setText methods for paste and new text
     setText(text, node = null) {
 
-        if (!node) {
+        let blocks
+
+        // create an empty element to paste the text in
+        // so it can be sanitized and escaped
+        const sanitizer = document.createElement('textarea')
+        sanitizer.value = text
+
+        // stop the observer while creating elements or the document will freeze!
+        this.observer.disconnect()
+
+        // typically not a paste action but an insertText api call
+        if (isNode(node) === true) {
+
+            blocks = sanitizer.value
+                .toString()
+                .split('\n')
+            
+        } else {
 
             // keep all content but the first element
             while (this.elm.firstChild) {
@@ -173,25 +216,24 @@ class Editor {
             
             this.setStartingElement()
             node = this.elm.firstChild
+
+            blocks = sanitizer.value
+                .toString()
+                .split(/\f/)
+
         }
 
-        // create an empty element to paste the text in
-        // so it can be sanitized and escaped
-        const sanitizer = document.createElement('textarea')
-        sanitizer.value = text
+        const fragment = document.createDocumentFragment()
 
-        let blocks = sanitizer.value
-            .toString()
-            .split(/\f/)
-
-        blocks.forEach((block, index) => {
+        blocks.forEach((block, i) => {
 
             // the first blocks should be appended to the current node
-            if (index == 0) {
-                
+            if (i == 0) {
+
+
                 const pos = caret.get(node)
-                const pre = node.innerText.substring(0, pos)
-                const trail = node.innerText.substring(pos, node.innerText.length)
+                const pre = node.innerText.substring(0, pos.start)
+                const trail = node.innerText.substring(pos.start, node.innerText.length)
 
                 node.textContent = pre + block + trail
                 caret.set(node, pos.start + block.length)
@@ -201,16 +243,18 @@ class Editor {
                 // all the rest should be created inside a new div
                 const div = document.createElement('div')
                 div.textContent = block
-                node.parentNode.insertBefore(div, node.nextSibling);
-                node = div
+                fragment.appendChild(div)
 
-                if (index == (blocks.length-1)) {
+                // if (i == (blocks.length-1)) {
 
-                    // set the caret to the last position in the last node
-                    caret.set(node, node.innerText.length)
-                }
+                //     // set the caret to the last position in the last node
+                //     caret.set(node, node.innerText.length)
+                // }
 
             }
+
+            this.elm.appendChild(fragment)
+            this.observer.observe(this.elm, observer)
         })
     }
 

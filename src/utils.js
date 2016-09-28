@@ -10,3 +10,11 @@ export function extend(defaults, options) {
 
     return defaults;
 }
+
+export function isNode(node) {
+
+    return (
+        typeof Node === "object" ? node instanceof Node : 
+        node && typeof node === "object" && typeof node.nodeType === "number" && typeof node.nodeName==="string"
+    );
+}
