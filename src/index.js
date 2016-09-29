@@ -13,6 +13,7 @@ const observer = {
 
 const settings = {
 
+    sectionClass: 'editor__section'
 }
 
 const events = {
@@ -108,23 +109,35 @@ class Editor {
                 if (mutation.target.id == this.elm.id) {
                     
                     const nodes = Array.from(mutation.addedNodes)
+
                     nodes.forEach((node) => {
                     
                         // if node is added check if it's actually a section
-                        if(node && node.className != 'editor__section') {
+                        if(node && node.className !=  this.settings.sectionClass) {
 
-                            const wrapper = document.createElement('div')
-                            wrapper.classList.add('editor__section')
-                            node.parentNode.insertBefore(wrapper, node);
+                            if (node.nodeName.toLowerCase() != 'div') {
+
+                                // replace the falsy section with the right node
+                                const wrapper = document.createElement('div')
+                                wrapper.classList.add(this.settings.sectionClass)
+                                node.parentNode.insertBefore(wrapper, node);
+                                
+                                // trigger the childlist mutation again and then highlights the node
+                                wrapper.appendChild(node);
+                                node.remove()
                             
-                            // trigger the childlist mutation again and then highlights the node
-                            wrapper.appendChild(node);
+                            } else {
+
+                                node.removeAttribute('class')
+                                node.classList.add(this.settings.sectionClass)
+                            }
+                            
 
                         } else {
 
                             // hightlight added nodes, dynamically inserted nodes via 
                             // node.innerText = blabla are not detected via characterData
-                            if (node.firstChild.nodeName.toLowerCase() == 'br') {
+                            if (node.firstChild && node.firstChild.nodeName.toLowerCase() == 'br') {
 
                                 node.firstChild.remove()
                             }
@@ -187,9 +200,7 @@ class Editor {
     }
 
     //@TODO: create different setText methods for paste and new text
-    setText(text, node = null) {
-
-        let blocks
+    setText(text) {
 
         // create an empty element to paste the text in
         // so it can be sanitized and escaped
@@ -198,64 +209,31 @@ class Editor {
 
         // stop the observer while creating elements or the document will freeze!
         this.observer.disconnect()
-
-        // typically not a paste action but an insertText api call
-        if (isNode(node) === true) {
-
-            blocks = sanitizer.value
-                .toString()
-                .split('\n')
-            
-        } else {
-
-            // keep all content but the first element
-            while (this.elm.firstChild) {
-
-                this.elm.removeChild(this.elm.firstChild);
-            }
-            
-            this.setStartingElement()
-            node = this.elm.firstChild
-
-            blocks = sanitizer.value
-                .toString()
-                .split(/\f/)
-
-        }
-
+        
+        const sections = sanitizer.value
+            .toString()
+            .split(/\f/)
+        
         const fragment = document.createDocumentFragment()
 
-        blocks.forEach((block, i) => {
-
-            // the first blocks should be appended to the current node
-            if (i == 0) {
-
-
-                const pos = caret.get(node)
-                const pre = node.innerText.substring(0, pos.start)
-                const trail = node.innerText.substring(pos.start, node.innerText.length)
-
-                node.textContent = pre + block + trail
-                caret.set(node, pos.start + block.length)
-
-            } else {
-
-                // all the rest should be created inside a new div
-                const div = document.createElement('div')
-                div.textContent = block
-                fragment.appendChild(div)
-
-                // if (i == (blocks.length-1)) {
-
-                //     // set the caret to the last position in the last node
-                //     caret.set(node, node.innerText.length)
-                // }
-
-            }
-
-            this.elm.appendChild(fragment)
-            this.observer.observe(this.elm, observer)
+        sections.forEach((section, index) => {
+            
+            const div = document.createElement('div')
+            div.classList.add(this.settings.sectionClass)
+            div.innerText = section
+            fragment.appendChild(div)
         })
+
+        // remove all elements from the editor
+        while (this.elm.firstChild) {
+
+            this.elm.removeChild(this.elm.firstChild);
+        }
+
+        // start observing again so the inserted text is automatically highlighted when inserted into the dom 
+        this.observer.observe(this.elm, observer)
+
+        this.elm.appendChild(fragment)
     }
 
     getHTML() {
