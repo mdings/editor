@@ -1,6 +1,7 @@
 import {extend, isNode} from './utils'
 import caret from './caret'
 import hljs from 'highlight.js'
+import inView from 'in-view'
 
 const observer = {
 
@@ -58,6 +59,7 @@ class Editor {
         this.observer.observe(this.elm, observer);
 
         // this.setStartingElement()
+
         this.elm.focus()
 
 
@@ -111,7 +113,10 @@ class Editor {
                     const nodes = Array.from(mutation.addedNodes)
 
                     nodes.forEach((node) => {
-                    
+                        
+                        // refresh the inView handler
+                        this.inView()
+
                         // if node is added check if it's actually a section
                         if(node && node.className != this.settings.sectionClass) {
 
@@ -129,11 +134,6 @@ class Editor {
                                 node.remove()
                             }
 
-                        }
-
-                        if (node.firstChild && node.firstChild.nodeName.toLowerCase() == 'br') {
-
-                            node.firstChild.remove()
                         }
                     })
                 }
@@ -163,11 +163,6 @@ class Editor {
             console.log('ok')
         }
 
-        // if (paste) {
-
-        //     e.preventDefault()
-        //     this.setText(paste, node)
-        // }
 
     }
 
@@ -222,6 +217,7 @@ class Editor {
         }
 
         this.elm.appendChild(fragment)
+        this.inView();
 
         this.observer.observe(this.elm, observer)
     }
@@ -234,6 +230,16 @@ class Editor {
     getHTML() {
 
         return this.elm.innerHTML
+    }
+
+    inView() {
+        inView(`.${this.settings.sectionClass}`)
+            .on('enter', el => {
+                el.style.visibility = 'visible'
+            })
+            .on('exit', el => {
+                el.style.visibility = 'hidden'
+            });
     }
 
     getTextForStorage() {

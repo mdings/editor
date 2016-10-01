@@ -21,6 +21,7 @@
     "webpack-dev-server": "^1.15.0"
   },
   "dependencies": {
-    "highlight.js": "^9.6.0"
+    "highlight.js": "^9.6.0",
+    "in-view": "^0.4.3"
   }
 }
