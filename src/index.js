@@ -57,7 +57,7 @@ class Editor {
         // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
 
-        this.setStartingElement()
+        // this.setStartingElement()
         this.elm.focus()
 
 
@@ -122,10 +122,18 @@ class Editor {
                                 const wrapper = document.createElement('div')
                                 wrapper.classList.add(this.settings.sectionClass, 'markdown')
                                 node.parentNode.insertBefore(wrapper, node)
-                                wrapper.innerText = node.textContent.length > 0 ? node.textContent : '\r'
+                                // wrapper.innerText = node.textContent.length > 0 ? node.textContent : '\r'
+                                wrapper.innerText = node.textContent;
+                                
                                 caret.set(wrapper, wrapper.textContent.length)
                                 node.remove()
                             }
+
+                        }
+
+                        if (node.firstChild && node.firstChild.nodeName.toLowerCase() == 'br') {
+
+                            node.firstChild.remove()
                         }
                     })
                 }
