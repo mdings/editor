@@ -11,7 +11,8 @@
 		}
 
 		#editor {
-			margin-left: 20px;
+			margin-left: 40px;
+			outline: none;
 		}
 
 		.hljs-bullet {
@@ -51,7 +52,7 @@
 			display: inline;
 		}
 	
-		#editor > div {
+		.editor__section {
 
 			min-height: 24px;
 			max-width: 90%;
@@ -63,19 +64,29 @@
 			max-width: 600px;
 			min-height: 200px;
 		}
-		#editor > div, #test > div {
+		.editor__section, #test > div {
 			position: relative;
 			line-height: 1.5;
 		}
 
-		#editor > div:not(:empty)::before {
+		.editor__section:not(:empty)::before {
 			display: block;
 			position: absolute;
-			left: -20px;
+			left: -40px;
 			counter-increment: paragraph;
 			content: counter(paragraph);
 		}
 
+		section {
+
+			visibility: hidden
+		}
+
+		section:first-child {
+
+			visibility: visible
+		}
+		
 		.hljs-emphasis {
 
 			font-style: italic

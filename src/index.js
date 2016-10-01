@@ -174,14 +174,11 @@ class Editor {
 
             const pos = caret.get(node)
 
-            const newDiv = node.cloneNode(true)
-            newDiv.innerText = node.innerText
-            hljs.highlightBlock(newDiv)
+            let text = node.innerText
+            const highlight = hljs.highlight('markdown', text, true)
+            node.innerHTML = highlight.value
 
-            node.parentNode.replaceChild(newDiv, node);
-        
-            caret.set(newDiv, pos.start)
-
+            caret.set(node, pos.start)
             this.observer.observe(this.elm, observer)
 
             this.trigger('change', this)
@@ -204,6 +201,7 @@ class Editor {
             .split(/\f/)
         
         const fragment = document.createDocumentFragment()
+
 
         sections.forEach((section, index) => {
             
