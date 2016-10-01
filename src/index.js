@@ -113,38 +113,23 @@ class Editor {
                     nodes.forEach((node) => {
                     
                         // if node is added check if it's actually a section
-                        if(node && node.className !=  this.settings.sectionClass) {
+                        if(node && node.className != this.settings.sectionClass) {
 
-                            if (node.nodeName.toLowerCase() != 'div') {
+                            if (node.nodeName.toLowerCase() != 'div'    
+                                || !node.classList.contains(this.settings.sectionClass)) {
 
+                                console.log('ok I am replacing this div')
                                 // replace the falsy section with the right node
                                 const wrapper = document.createElement('div')
-                                wrapper.classList.add(this.settings.sectionClass)
+                                wrapper.innerText = node.textContent
+                                wrapper.classList.add(this.settings.sectionClass, 'markdown')
                                 node.parentNode.insertBefore(wrapper, node);
+                                caret.set(wrapper, node.textContent.length)
                                 
                                 // trigger the childlist mutation again and then highlights the node
                                 wrapper.appendChild(node);
                                 node.remove()
-                            
-                            } else {
-
-                                node.removeAttribute('class')
-                                node.classList.add(this.settings.sectionClass)
-                            }
-                            
-
-                        } else {
-
-                            // hightlight added nodes, dynamically inserted nodes via 
-                            // node.innerText = blabla are not detected via characterData
-                            if (node.firstChild && node.firstChild.nodeName.toLowerCase() == 'br') {
-
-                                node.firstChild.remove()
-                            }
-
-                            if (node.textContent.length) {
                                 
-                                this.highlight(node)
                             }
                         }
                     })
@@ -197,7 +182,7 @@ class Editor {
 
             this.observer.observe(this.elm, observer)
 
-            // this.trigger('change', this)
+            this.trigger('change', this)
         }
     }
 
