@@ -82,19 +82,18 @@
 	</style>
 </head>
 <body>
-	<div id="editor"></div>
+	<div id="editor" class="markdown"></div>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
 	<script>
 		function saveText() {
 
 			var txt = editor.getTextForStorage()
 			localStorage.setItem('text', JSON.stringify(txt))
-			console.log(txt)
 		}
 
 		function setText() {
 
 			var txt = JSON.parse(localStorage.getItem('text'))
-			console.log(txt)
 			editor.setText(txt)
 
 		}
@@ -107,6 +106,12 @@
 		const editor = new Editor('#editor')
 		editor.on('change', () => {
     		// console.log(editor.getText())
+		})
+
+		editor.on('highlight', (node) => {
+
+			var highlight = hljs.highlight('markdown', node.innerText, true)
+			editor.setNode(node, highlight.value)
 		})
 
 </script>

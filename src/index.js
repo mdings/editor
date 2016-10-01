@@ -18,7 +18,8 @@ const settings = {
 
 const events = {
     
-    change: null
+    change: null,
+    highlight: null
 }
 
 class Editor {
@@ -104,7 +105,6 @@ class Editor {
             }
 
             if (mutation.type == 'childList') {
-                
                 // only look for mutations on the parent #editor element
                 if (mutation.target.id == this.elm.id) {
                     
@@ -189,13 +189,15 @@ class Editor {
 
             this.observer.disconnect()
 
+            // this.trigger('highlight', this, node)
+
             let text = node.innerText
             const highlight = hljs.highlight('markdown', text, true)
             node.innerHTML = highlight.value
 
             this.observer.observe(this.elm, observer)
 
-            this.trigger('change', this)
+            // this.trigger('change', this)
         }
     }
 
@@ -219,8 +221,9 @@ class Editor {
         sections.forEach((section, index) => {
             
             const div = document.createElement('div')
-            div.classList.add(this.settings.sectionClass)
+            div.classList.add(this.settings.sectionClass, 'markdown')
             div.innerText = section
+            hljs.highlightBlock(div)
             fragment.appendChild(div)
         })
 
@@ -230,10 +233,14 @@ class Editor {
             this.elm.removeChild(this.elm.firstChild);
         }
 
-        // start observing again so the inserted text is automatically highlighted when inserted into the dom 
-        this.observer.observe(this.elm, observer)
-
         this.elm.appendChild(fragment)
+
+        this.observer.observe(this.elm, observer)
+    }
+
+    setNode(node, value) {
+
+        node.innerHTML = value
     }
 
     getHTML() {
@@ -306,8 +313,8 @@ class Editor {
     trigger(e, ctx, args) {
 
         if (events[e]) {
-
-            events[e].apply(ctx, args)
+            
+            events[e].call(ctx, args)
         }
 
     }

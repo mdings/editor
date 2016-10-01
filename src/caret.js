@@ -1,5 +1,3 @@
-let caretOffset
-
 const parent = (node) => {
 
     const range = window.getSelection().getRangeAt(0);
