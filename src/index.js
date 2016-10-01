@@ -99,9 +99,9 @@ class Editor {
 
                     if (closest) {
 
-                        const pos = caret.get(closest)
+
                         this.highlight(closest)
-                        caret.set(closest, pos.start)
+
                     }
                 }
             }
@@ -172,11 +172,15 @@ class Editor {
 
             this.observer.disconnect()
 
-            // this.trigger('highlight', this, node)
+            const pos = caret.get(node)
 
-            let text = node.innerText
-            const highlight = hljs.highlight('markdown', text, true)
-            node.innerHTML = highlight.value
+            const newDiv = node.cloneNode(true)
+            newDiv.innerText = node.innerText
+            hljs.highlightBlock(newDiv)
+
+            node.parentNode.replaceChild(newDiv, node);
+        
+            caret.set(newDiv, pos.start)
 
             this.observer.observe(this.elm, observer)
 
@@ -217,7 +221,6 @@ class Editor {
         }
 
         this.elm.appendChild(fragment)
-        this.inView();
 
         this.observer.observe(this.elm, observer)
     }
@@ -233,13 +236,7 @@ class Editor {
     }
 
     inView() {
-        inView(`.${this.settings.sectionClass}`)
-            .on('enter', el => {
-                el.style.visibility = 'visible'
-            })
-            .on('exit', el => {
-                el.style.visibility = 'hidden'
-            });
+    
     }
 
     getTextForStorage() {
