@@ -118,18 +118,13 @@ class Editor {
                             if (node.nodeName.toLowerCase() != 'div'    
                                 || !node.classList.contains(this.settings.sectionClass)) {
 
-                                console.log('ok I am replacing this div')
                                 // replace the falsy section with the right node
                                 const wrapper = document.createElement('div')
-                                wrapper.innerText = node.textContent
                                 wrapper.classList.add(this.settings.sectionClass, 'markdown')
-                                node.parentNode.insertBefore(wrapper, node);
-                                caret.set(wrapper, node.textContent.length)
-                                
-                                // trigger the childlist mutation again and then highlights the node
-                                wrapper.appendChild(node);
+                                node.parentNode.insertBefore(wrapper, node)
+                                wrapper.innerText = node.textContent.length > 0 ? node.textContent : '\r'
+                                caret.set(wrapper, wrapper.textContent.length)
                                 node.remove()
-                                
                             }
                         }
                     })
