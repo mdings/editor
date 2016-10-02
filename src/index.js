@@ -2,6 +2,7 @@ import {extend, isNode} from './utils'
 import caret from './caret'
 import hljs from 'highlight.js'
 import inView from 'in-view'
+import diff from 'fast-diff'
 
 const observer = {
 
@@ -64,21 +65,20 @@ class Editor {
 
 
         // watch for paste event
-        this.elm.addEventListener('paste', this.onPaste.bind(this))
-        
-        this.elm.addEventListener('keydown', (e) => {
-
-            if (e.which == 13) {
-
-                if (caret.parent().className == 'hljs-bullet') {
-
-                    // @TODO: make an automatic new list item
-                    e.preventDefault()
-                }
-            }
-        })
+        // this.elm.addEventListener('paste', this.onPaste.bind(this))
 
         
+        this.elm.addEventListener('input', (e) => {
+
+            // if (e.which == 13) {
+
+            //     if (caret.parent().className == 'hljs-bullet') {
+
+            //         // @TODO: make an automatic new list item
+            //         e.preventDefault()
+            //     }
+            // }
+        }, true)
 
         return this
     }
@@ -99,9 +99,14 @@ class Editor {
 
                     if (closest) {
 
+                        const patt = new RegExp(/[#>*_\s]/)
+                        const result = diff(mutation.oldValue, mutation.target.textContent)
+                        const addedChar = result[1][1]
 
-                        this.highlight(closest)
+                        if (patt.test(addedChar)) {
 
+                            this.highlight(closest)
+                        }
                     }
                 }
             }
@@ -113,9 +118,6 @@ class Editor {
                     const nodes = Array.from(mutation.addedNodes)
 
                     nodes.forEach((node) => {
-                        
-                        // refresh the inView handler
-                        this.inView()
 
                         // if node is added check if it's actually a section
                         if(node && node.className != this.settings.sectionClass) {
@@ -135,6 +137,12 @@ class Editor {
                             }
 
                         }
+
+                        if (node.nodeType == 1) {
+
+                            this.highlight(node)
+                        }
+
                     })
                 }
             }
