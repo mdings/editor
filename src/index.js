@@ -1,8 +1,8 @@
 import {extend, isNode} from './utils'
 import caret from './caret'
-import hljs from 'highlight.js'
-import inView from 'in-view'
-import diff from 'fast-diff'
+import Prism from 'prismjs'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/plugins/keep-markup/prism-keep-markup'
 
 const observer = {
 
@@ -99,14 +99,7 @@ class Editor {
 
                     if (closest) {
 
-                        const patt = new RegExp(/[#>*_\s]/)
-                        const result = diff(mutation.oldValue, mutation.target.textContent)
-                        const addedChar = result[1][1]
-
-                        if (patt.test(addedChar)) {
-
-                            this.highlight(closest)
-                        }
+                        this.highlight(closest)
                     }
                 }
             }
@@ -179,16 +172,10 @@ class Editor {
         if (node) {
 
             this.observer.disconnect()
-
             const pos = caret.get(node)
-
-            let text = node.innerText
-            const highlight = hljs.highlight('markdown', text, true)
-            node.innerHTML = highlight.value
-
+            node.innerHTML = Prism.highlight(node.innerText, Prism.languages.markdown)
             caret.set(node, pos.start)
             this.observer.observe(this.elm, observer)
-
             this.trigger('change', this)
         }
     }
@@ -215,8 +202,9 @@ class Editor {
             
             const div = document.createElement('div')
             div.classList.add(this.settings.sectionClass, 'markdown')
-            div.innerText = section
-            hljs.highlightBlock(div)
+            div.innerHTML = Prism.highlight(section, Prism.languages.markdown)
+            // div.innerText = section
+            // hljs.highlightBlock(div)
             fragment.appendChild(div)
         })
 

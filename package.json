@@ -17,12 +17,15 @@
     "babel-loader": "^6.2.5",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-es2015": "^6.14.0",
+    "prismjs": "^1.5.1",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.0"
   },
   "dependencies": {
     "fast-diff": "^1.0.1",
     "highlight.js": "^9.6.0",
-    "in-view": "^0.4.3"
+    "in-view": "^0.4.3",
+    "prismjs": "^1.5.1",
+    "promise": "^7.1.1"
   }
 }

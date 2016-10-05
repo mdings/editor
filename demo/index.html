@@ -23,6 +23,8 @@
 			font-weight: bold;
 		}
 
+		.list {}
+
 		.heading {
 			color: goldenrod
 		}
@@ -55,13 +57,11 @@
 		.editor__section {
 
 			min-height: 24px;
-			max-width: 90%;
 			border: 1px solid green
 		}
 
 		#editor, #test {
 			border: 1px solid blue;
-			max-width: 600px;
 			min-height: 200px;
 		}
 		.editor__section, #test > div {
@@ -120,12 +120,6 @@
 
 			// var words = editor.getText().split(/\s/);
 			// console.log(words.length -1 )
-		})
-
-		editor.on('highlight', (node) => {
-
-			var highlight = hljs.highlight('markdown', node.innerText, true)
-			editor.setNode(node, highlight.value)
 		})
 
 </script>
