@@ -245,6 +245,11 @@ class Editor {
         return this.elm.innerText
     }
 
+    getCaret() {
+
+        return caret.get(this.elm)
+    }
+
     setStartingElement() {
 
         // there are no children yet so create one
