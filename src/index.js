@@ -65,20 +65,12 @@ class Editor {
 
 
         // watch for paste event
-        // this.elm.addEventListener('paste', this.onPaste.bind(this))
+        this.elm.addEventListener('paste', this.onPaste.bind(this))
+        // this.elm.addEventListener('k', this.onInput.bind(this), true)
 
+// 
         
-        this.elm.addEventListener('input', (e) => {
-
-            // if (e.which == 13) {
-
-            //     if (caret.parent().className == 'hljs-bullet') {
-
-            //         // @TODO: make an automatic new list item
-            //         e.preventDefault()
-            //     }
-            // }
-        }, true)
+       
 
         return this
     }
@@ -90,7 +82,6 @@ class Editor {
             if (mutation.type == 'characterData') {
                 
                 const target = mutation.target.parentNode
-                this.target = target
 
                 if (target) {
 
@@ -163,6 +154,8 @@ class Editor {
 
             console.log('ok')
         }
+
+        e.preventDefault
 
 
     }
