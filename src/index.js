@@ -1,9 +1,11 @@
 import {extend, isNode} from './utils'
 import caret from './caret'
+import hljs from 'highlight.js'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-markdown'
 import 'prismjs/plugins/keep-markup/prism-keep-markup'
 
+console.log(hljs)
 const observer = {
 
     subtree: true,                  // watch mutations from children
@@ -168,7 +170,8 @@ class Editor {
             // Pause the observer for a while
             this.observer.disconnect()
             const pos = caret.get(node)
-            node.innerHTML = Prism.highlight(node.innerText, Prism.languages.markdown)
+            const highlight = hljs.highlight('markdown', node.innerText)
+            node.innerHTML = highlight.value
             caret.set(node, pos.start)
             this.observer.observe(this.elm, observer)
             this.trigger('change', this)
