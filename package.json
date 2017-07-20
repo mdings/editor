@@ -4,8 +4,7 @@
   "description": "",
   "main": "lib/editor.js",
   "scripts": {
-    "dev": "WEBPACK_ENV=dev webpack-dev-server --hot --port 8888 --progress --colors",
-    "build": "WEBPACK_ENV=build-min webpack --progress && WEBPACK_ENV=build webpack --progress",
+    "dev": "budo src/index.js --live -- -s Editor -t babelify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,7 +15,10 @@
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0",
+    "budo": "^10.0.3",
     "prismjs": "^1.5.1",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.0"

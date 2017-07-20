@@ -3,7 +3,7 @@
 <head>
 	<title>Awesome editor</title>
 	<style type="text/css">
-		
+
 		* {
 
 			margin: 0;
@@ -54,7 +54,7 @@
 		#editor span {
 			display: inline;
 		}
-	
+
 		.editor__section {
 
 			min-height: 24px;
@@ -87,7 +87,7 @@
 
 			visibility: visible
 		}
-		
+
 		.hljs-emphasis {
 
 			font-style: italic
@@ -110,13 +110,15 @@
 			editor.setText(txt)
 
 		}
-	
+
 	</script>
 	<button onclick="saveText()">Save content to memory</button>
 	<button onclick="setText()">Get content from memory</button>
-	<script src="/lib/editor.dev.js"></script>
+	<script src="../index.js"></script>
 	<script>
+
 		const editor = new Editor('#editor')
+
 		editor.on('change', () => {
 
 			// var words = editor.getText().split(/\s/);

@@ -19,7 +19,7 @@ const settings = {
 }
 
 const events = {
-    
+
     change: null,
     highlight: null
 }
@@ -27,17 +27,17 @@ const events = {
 class Editor {
 
     constructor(el, options) {
-        
+
         const opts = options || {}
         const elm = document.querySelector(el)
-        
+
         if (!(elm instanceof HTMLElement)) {
 
             throw new Error('Invalid `el` argument, HTMLElement required');
         }
 
         if (!(opts instanceof Object)) {
-            
+
             throw new Error('Invalid `options` argument, object required');
         }
 
@@ -52,7 +52,7 @@ class Editor {
 
         this.elm.setAttribute('contenteditable', true)
         this.elm.style.whiteSpace = 'pre-wrap'
-        
+
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
 
@@ -68,9 +68,9 @@ class Editor {
         this.elm.addEventListener('paste', this.onPaste.bind(this))
         // this.elm.addEventListener('k', this.onInput.bind(this), true)
 
-// 
-        
-       
+//
+
+
 
         return this
     }
@@ -80,7 +80,7 @@ class Editor {
         mutations.forEach((mutation) => {
 
             if (mutation.type == 'characterData') {
-                
+
                 const target = mutation.target.parentNode
 
                 if (target) {
@@ -98,7 +98,7 @@ class Editor {
             if (mutation.type == 'childList') {
                 // only look for mutations on the parent #editor element
                 if (mutation.target.id == this.elm.id) {
-                    
+
                     const nodes = Array.from(mutation.addedNodes)
 
                     nodes.forEach((node) => {
@@ -106,7 +106,7 @@ class Editor {
                         // if node is added check if it's actually a section
                         if(node && node.className != this.settings.sectionClass) {
 
-                            if (node.nodeName.toLowerCase() != 'div'    
+                            if (node.nodeName.toLowerCase() != 'div'
                                 || !node.classList.contains(this.settings.sectionClass)) {
 
                                 // replace the falsy section with the right node
@@ -115,7 +115,7 @@ class Editor {
                                 node.parentNode.insertBefore(wrapper, node)
                                 // wrapper.innerText = node.textContent.length > 0 ? node.textContent : '\r'
                                 wrapper.innerText = node.textContent;
-                                
+
                                 caret.set(wrapper, wrapper.textContent.length)
                                 node.remove()
                             }
@@ -144,12 +144,12 @@ class Editor {
         //  NOTE: to see if the paste data is coming externally we could create a copy event
         //  inside the editor. When the copy data is the same as the paste, the data is internal
 
-        // this might not be the most efficient way to implement 
+        // this might not be the most efficient way to implement
         // pasting but for now the lesser evil
 
         const paste = e.clipboardData.getData('text/plain')
         let node = e.path[0]
-        
+
         if(window.getSelection() == paste) {
 
             console.log('ok')
@@ -183,16 +183,16 @@ class Editor {
 
         // stop the observer while creating elements or the document will freeze!
         this.observer.disconnect()
-        
+
         const sections = sanitizer.value
             .toString()
             .split(/\f/)
-        
+
         const fragment = document.createDocumentFragment()
 
 
         sections.forEach((section, index) => {
-            
+
             const div = document.createElement('div')
             div.classList.add(this.settings.sectionClass, 'markdown')
             div.innerHTML = Prism.highlight(section, Prism.languages.markdown)
@@ -223,7 +223,7 @@ class Editor {
     }
 
     inView() {
-    
+
     }
 
     getTextForStorage() {
@@ -236,7 +236,7 @@ class Editor {
 
             textBlocks.push(e.innerText)
         })
-        
+
         return textBlocks.join('\f')
     }
 
@@ -265,7 +265,7 @@ class Editor {
             this.elm.insertBefore(div, this.elm.firstChild)
             this.elm.firstChild.nextSibling.remove()
             caret.set(div, 0)
-        } 
+        }
     }
 
     attach(e, callback) {
@@ -288,19 +288,19 @@ class Editor {
     }
 
     on(e, callback) {
-        
-        // arguments = e, callback 
+
+        // arguments = e, callback
         this.attach.apply(this, arguments)
     }
 
     trigger(e, ctx, args) {
 
         if (events[e]) {
-            
+
             events[e].call(ctx, args)
         }
 
     }
 }
 
-export default Editor
+module.exports = Editor
