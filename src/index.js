@@ -8,9 +8,9 @@ const observer = {
 
     subtree: true,                  // watch mutations from children
     attributes: false,
-    childList: true,               // watch when children added
+    childList: true,                // watch when children added
     characterData: true,
-    characterDataOldValue: true
+    characterDataOldValue: true     // compare the old value to the new value
 }
 
 const settings = {
@@ -50,13 +50,12 @@ class Editor {
         this.selector = el
         this.settings = extend(settings, opts)
 
+        // Set attributes on the parent editor element
         this.elm.setAttribute('contenteditable', true)
         this.elm.style.whiteSpace = 'pre-wrap'
 
         // setup the observers
         this.observer = new MutationObserver(this.onMutate.bind(this))
-
-        // pass in the target node, as well as the observer options
         this.observer.observe(this.elm, observer);
 
         // this.setStartingElement()
@@ -79,13 +78,14 @@ class Editor {
 
         mutations.forEach((mutation) => {
 
+            // If the text inside the elm changes
             if (mutation.type == 'characterData') {
 
                 const target = mutation.target.parentNode
 
                 if (target) {
 
-                    // look for the closest wrapping div ('#editor > div')
+                    // look for the closest wrapping div ('#editor > div'), the mutation might also for example occur within a <span class="title">title</span>
                     const closest = target.closest('.editor__section')
 
                     if (closest) {
@@ -112,6 +112,7 @@ class Editor {
                                 // replace the falsy section with the right node
                                 const wrapper = document.createElement('div')
                                 wrapper.classList.add(this.settings.sectionClass, 'markdown')
+                                wrapper.spellcheck = false
                                 node.parentNode.insertBefore(wrapper, node)
                                 // wrapper.innerText = node.textContent.length > 0 ? node.textContent : '\r'
                                 wrapper.innerText = node.textContent;
@@ -164,6 +165,7 @@ class Editor {
 
         if (node) {
 
+            // Pause the observer for a while
             this.observer.disconnect()
             const pos = caret.get(node)
             node.innerHTML = Prism.highlight(node.innerText, Prism.languages.markdown)
